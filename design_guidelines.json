@@ -1,0 +1,110 @@
+{
+  "theme_and_archetype": {
+    "domain": "Finance, SaaS ERP for SMBs (Your-Statistics)",
+    "theme": "Light (Default) with premium Dark Mode support",
+    "archetype": "Archetype 4 (Swiss & High-Contrast) + Luxury/Premium touch (Apple/Linear/Stripe aesthetics)"
+  },
+  "typography": {
+    "font_families": {
+      "heading": "Outfit",
+      "body": "Inter",
+      "mono": "JetBrains Mono"
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight font-semibold",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-semibold",
+      "h3": "text-xl sm:text-2xl font-medium",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "small_label": "text-xs tracking-[0.1em] uppercase font-semibold"
+    },
+    "rules": "Never use Inter for headings. Keep tight letter spacing (tracking-tight) for large text."
+  },
+  "colors": {
+    "light": {
+      "background": "#FAFAFA",
+      "surface": "#FFFFFF",
+      "primary": "#0066FF",
+      "primary_hover": "#0052CC",
+      "success": "#10B981",
+      "success_bg": "#D1FAE5",
+      "danger": "#EF4444",
+      "text_main": "#0A0A0A",
+      "text_muted": "#52525B",
+      "border": "#E4E4E7"
+    },
+    "dark": {
+      "background": "#09090B",
+      "surface": "#121214",
+      "primary": "#3B82F6",
+      "primary_hover": "#60A5FA",
+      "success": "#10B981",
+      "success_bg": "rgba(16,185,129,0.1)",
+      "danger": "#F87171",
+      "text_main": "#FAFAFA",
+      "text_muted": "#A1A1AA",
+      "border": "#27272A"
+    }
+  },
+  "layout_and_spacing": {
+    "philosophy": "Generous Spacing, Optical Alignment, Stripe-like precision.",
+    "container_padding": "p-6 md:p-8 lg:p-12",
+    "bento_grid": "Tight gap-4 or gap-6 for dashboards. Full usage of pixels with consistent h-full children.",
+    "border_radius": {
+      "large": "rounded-2xl",
+      "medium": "rounded-xl",
+      "small": "rounded-md"
+    },
+    "shadows": {
+      "ambient_light": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+      "hover_lift": "shadow-[0_20px_40px_rgb(0,0,0,0.08)]",
+      "dark_ambient": "shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
+    }
+  },
+  "components": {
+    "cards": "Flat background, 1px subtle border, no heavy drop shadows by default. Add hover lift on interactive cards.",
+    "buttons": "Primary: Solid background, crisp text. Subtle scale on hover. Secondary: Ghost or Outline with subtle background tint on hover.",
+    "inputs": "Shadcn based. 1px border, transparent background, solid focus ring (ring-primary/20).",
+    "navigation": "Crystal glassmorphism for floating nav (backdrop-blur-xl bg-white/70 or bg-black/60) with 1px delicate inner stroke.",
+    "charts": "Recharts / Shadcn Charts. Clean lines, hide generic grid lines, use smooth splines for line charts, vibrant gradients for areas.",
+    "empty_states": "High-end minimal empty states. Subtle watermark icons, clear typography explaining what to do, primary CTA to add data. NO fake data in the dashboard upon first login."
+  },
+  "interactions_and_motion": {
+    "hover": "Explicit text color and background color changes. Slight lift (-translate-y-0.5) for cards.",
+    "transitions": "transition-all duration-300 ease-out",
+    "micro_interactions": "Use Framer Motion for page loads (staggered fade-up), modal opens (scale-in), and tab switching."
+  },
+  "media": {
+    "icons_library": "lucide-react",
+    "images": {
+      "hero_background": {
+        "url": "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwzfHxjbGVhbiUyMG1pbmltYWwlMjB3aGl0ZSUyMGFyY2hpdGVjdHVyZXxlbnwwfHx8fDE3ODM0NjYwODl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Clean white minimal architecture for landing page background texture"
+      },
+      "testimonials": [
+        {
+          "url": "https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBidXNpbmVzcyUyMG93bmVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzgzNDY2MDg5fDA&ixlib=rb-4.1.0&q=85",
+          "description": "Modern business owner portrait 1"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1590649613897-1d5c44ca3409?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBidXNpbmVzcyUyMG93bmVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzgzNDY2MDg5fDA&ixlib=rb-4.1.0&q=85",
+          "description": "Modern business owner portrait 2"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1618491609764-0dc04604a02a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBidXNpbmVzcyUyMG93bmVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzgzNDY2MDg5fDA&ixlib=rb-4.1.0&q=85",
+          "description": "Modern business owner portrait 3"
+        }
+      ]
+    }
+  },
+  "specific_requirements": {
+    "login_screen": "Mandatory before accessing app features. Elegant, clean, dark/light toggle.",
+    "admin_master": "Luluis@gmail.com is the master admin. View for managing tenants/users.",
+    "client_dashboard": "Starts EMPTY. No placeholder data. Beautiful empty states prompting user to register data. Whatsapp button (+55 73 98189-1863) for 'Conta aguardando aprovação' (Account pending approval).",
+    "language": "Portuguese BR",
+    "logo_concept": "Exclusive 'Y' logo representing growth, control, charts. Implement via SVG with geometry.",
+    "testing": "All interactive elements MUST include data-testid attribute (e.g. data-testid='login-submit-button').",
+    "tech_stack": "React with .js files (NO .tsx), Tailwind CSS, Shadcn UI primitives, Framer Motion."
+  },
+  "instructions_to_main_agent": "Ensure Shadcn components are heavily customized to match Apple/Linear/Stripe aesthetics. Strip generic Vercel defaults. Use Lucide React for consistent iconography. Focus heavily on layout precision (gap, padding, border-radius). Ensure 100% of requested features (Painel Master, Financeiro, Dashboard, Landing Page, Authentication) are structurally present. Do not use generic Lorem Ipsum. Write real copy in Portuguese BR. Strictly use JavaScript (.js) instead of TypeScript for implementation. Always attach data-testid attributes to interactive elements."
+}
