@@ -1,0 +1,47 @@
+{
+  "summary": "First-finish smoke test. Auth, config, and admin endpoints work. Frontend loads and admin panel renders. Two CRITICAL backend bugs block the entire finance module: POST /api/finance/transactions and GET /api/finance/dashboard both return 500. Full frontend dashboard/receitas/despesas flow cannot be validated until these are fixed.",
+  "tested_scope": ["backend", "frontend", "auth", "integration"],
+  "passed": [
+    "GET /api/config/public -> 200 with {whatsapp:'+5573981891863', app_name:'Your-Statistics'}",
+    "POST /api/auth/login wrong password -> 401 'E-mail ou senha inválidos.'",
+    "POST /api/auth/login admin (luluis@gmail.com/Admin@2026!) -> 200 with token; user.role='admin', status='aprovado', tenant_id present",
+    "POST /api/auth/login demo -> 200; POST /api/auth/login pendente -> 200 with status='pendente' (frontend handles /pending-approval)",
+    "GET /api/auth/me with Bearer -> 200; no password_hash in response",
+    "GET /api/admin/users as demo user -> 403 'Acesso negado. Apenas administradores.'",
+    "GET /api/admin/users?status=pendente as admin -> 200, returns pending user and counts",
+    "POST /api/finance/transactions as pending user -> 403 'Sua conta ainda não foi aprovada.' (approved gate works)",
+    "Frontend /login page loads with all data-testid inputs",
+    "Admin login redirects to /master; master-search visible; KPI counters and filter buttons render",
+    "Demo login redirects to /app/dashboard; 'Painel Master' link is hidden for non-admin"
+  ],
+  "failed": [
+    {
+      "area": "backend / finance",
+      "issue": "POST /api/finance/transactions returns 500 Internal Server Error. Root cause: after `await db.transactions.insert_one(doc)`, Motor mutates `doc` to include an `_id` ObjectId; the endpoint then returns {'transaction': doc}, and FastAPI's jsonable_encoder fails with: ValueError: [TypeError(\"'ObjectId' object is not iterable\"), TypeError('vars() argument must have __dict__ attribute')]. Happens for both receita and despesa with valid payload (payment_method field).",
+      "evidence": "/app/backend/server.py lines 292-311 (create_transaction). Backend traceback in /var/log/supervisor/backend.err.log. Verified via curl with valid demo token.",
+      "priority": "HIGH"
+    },
+    {
+      "area": "backend / finance",
+      "issue": "GET /api/finance/dashboard returns 500 Internal Server Error. Root cause at /app/backend/server.py:350: `if d >= month_start:` -> TypeError: can't compare offset-naive and offset-aware datetimes. `datetime.fromisoformat(tx['date'].replace('Z','+00:00'))` returns naive when tx.date is a plain 'YYYY-MM-DD' (as sent from FE and stored by seed), while `now_utc()` is tz-aware.",
+      "evidence": "Traceback in backend.err.log; endpoint hit as demo user with Bearer token.",
+      "priority": "HIGH"
+    }
+  ],
+  "not_tested_due_to_blockers": [
+    "Dashboard KPIs / monthly / weekly / recent shape",
+    "Frontend empty-state -> add 'Nova receita' -> KPI/chart/recent update in real time",
+    "Revenues/Expenses pages create+delete+totals",
+    "Multi-tenant isolation on GET /api/finance/transactions (needs a working POST first)",
+    "Register flow -> /pending-approval redirect (not exercised end-to-end)",
+    "Admin approve/suspend/reactivate/delete + self-delete-400"
+  ],
+  "action_items": [
+    "Fix POST /api/finance/transactions: strip `_id` before returning (e.g., `doc.pop('_id', None)` after insert_one) or build the response dict without relying on the mutated doc.",
+    "Fix GET /api/finance/dashboard datetime handling: normalize `d` to tz-aware UTC (e.g., if d.tzinfo is None: d = d.replace(tzinfo=timezone.utc)) OR compare by date().isoformat() vs month_start.date().isoformat(). Same care for weekly/monthly loops.",
+    "After fix, retest: create receita+despesa as demo, verify /finance/dashboard KPIs, and confirm tenant isolation (create tx with a second registered user and ensure demo cannot see it)."
+  ],
+  "success_rate": {"backend": "70%", "frontend": "80%"},
+  "retest_needed": true,
+  "full_testing_deferred": true
+}

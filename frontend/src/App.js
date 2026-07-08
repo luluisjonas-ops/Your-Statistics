@@ -1,55 +1,58 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
+import { AuthProvider } from "@/context/AuthContext";
+import { ProtectedRoute } from "@/components/app/ProtectedRoute";
+import AppShell from "@/components/app/AppShell";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import PendingApproval from "@/pages/PendingApproval";
+import MasterPanel from "@/pages/MasterPanel";
+import Dashboard from "@/pages/Dashboard";
+import TransactionsPage from "@/pages/TransactionsPage";
+import ComingSoon from "@/pages/ComingSoon";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+function Shell({ children }) { return <AppShell>{children}</AppShell>; }
 
 function App() {
   return (
-    <div className="App">
+    <AuthProvider>
       <BrowserRouter>
+        <Toaster position="top-right" richColors closeButton />
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/pending-approval" element={
+            <ProtectedRoute><PendingApproval /></ProtectedRoute>
+          } />
+
+          <Route path="/master" element={
+            <ProtectedRoute admin><MasterPanel /></ProtectedRoute>
+          } />
+
+          <Route path="/app/dashboard" element={<ProtectedRoute><Shell><Dashboard /></Shell></ProtectedRoute>} />
+          <Route path="/app/financial" element={<ProtectedRoute><Shell><TransactionsPage type="all" title="Visão Financeira" subtitle="Todos os seus lançamentos em um só lugar." /></Shell></ProtectedRoute>} />
+          <Route path="/app/revenues" element={<ProtectedRoute><Shell><TransactionsPage type="receita" title="Receitas" subtitle="Cadastre e acompanhe todas as entradas da sua empresa." /></Shell></ProtectedRoute>} />
+          <Route path="/app/expenses" element={<ProtectedRoute><Shell><TransactionsPage type="despesa" title="Despesas" subtitle="Registre saídas e categorize os gastos por fornecedor, tipo e status." /></Shell></ProtectedRoute>} />
+          <Route path="/app/cashflow" element={<ProtectedRoute><Shell><TransactionsPage type="all" title="Fluxo de Caixa" subtitle="Entradas e saídas em ordem cronológica." /></Shell></ProtectedRoute>} />
+
+          {["banks","pix","cards","clients","suppliers","products","stock","employees","agenda","ai","reports","settings","support"].map((p) => (
+            <Route key={p} path={`/app/${p}`} element={
+              <ProtectedRoute><Shell><ComingSoon title={{
+                banks:"Bancos", pix:"PIX", cards:"Cartões", clients:"Clientes", suppliers:"Fornecedores",
+                products:"Produtos", stock:"Estoque", employees:"Funcionários", agenda:"Agenda",
+                ai:"IA Financeira", reports:"Relatórios", settings:"Configurações", support:"Ajuda & Suporte",
+              }[p]} /></Shell></ProtectedRoute>
+            } />
+          ))}
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </div>
+    </AuthProvider>
   );
 }
 
