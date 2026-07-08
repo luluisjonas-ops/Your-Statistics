@@ -5,24 +5,24 @@ import { MessageCircle, Clock, LogOut, RefreshCw } from "lucide-react";
 import { LogoLockup } from "@/components/app/Logo";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
+import WhatsAppModal from "@/components/app/WhatsAppModal";
 
 export default function PendingApproval() {
   const { user, logout, refresh } = useAuth();
   const nav = useNavigate();
   const [wa, setWa] = useState("+5573981891863");
+  const [waOpen, setWaOpen] = useState(false);
 
   useEffect(() => {
     api.get("/config/public").then((r) => setWa(r.data.whatsapp)).catch(() => {});
   }, []);
 
-  // Redirect if approved
   useEffect(() => {
     if (user?.status === "aprovado" && user?.role !== "admin") nav("/app/dashboard");
     if (user?.role === "admin") nav("/master");
   }, [user, nav]);
 
   const message = `Olá! Sou ${user?.name || ""} da ${user?.company || ""}. Fiz meu cadastro no Your-Statistics (e-mail: ${user?.email}) e gostaria de liberar meu acesso.`;
-  const link = `https://wa.me/${wa.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
 
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center p-6">
@@ -42,9 +42,9 @@ export default function PendingApproval() {
           você receberá acesso completo ao painel Your-Statistics.
         </p>
         <div className="mt-8 flex flex-col gap-2">
-          <a href={link} target="_blank" rel="noreferrer" data-testid="pending-whatsapp-btn" className="ys-btn-primary rounded-xl h-11 inline-flex items-center justify-center gap-2 font-medium">
+          <button onClick={()=>setWaOpen(true)} data-testid="pending-whatsapp-btn" className="ys-btn-primary rounded-xl h-11 inline-flex items-center justify-center gap-2 font-medium">
             <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
-          </a>
+          </button>
           <button onClick={refresh} data-testid="pending-refresh" className="rounded-xl h-11 border border-border hover:bg-accent inline-flex items-center justify-center gap-2 text-sm">
             <RefreshCw className="h-4 w-4" /> Verificar novamente
           </button>
@@ -53,6 +53,8 @@ export default function PendingApproval() {
           </button>
         </div>
       </motion.div>
+      <WhatsAppModal open={waOpen} onClose={()=>setWaOpen(false)} defaultMessage={message} />
+      <div className="hidden">{wa}</div>
     </div>
   );
 }

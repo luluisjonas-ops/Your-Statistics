@@ -6,6 +6,7 @@ import {
   BarChart3, Users, Bot, CalendarDays, MessageCircle,
 } from "lucide-react";
 import { LogoLockup } from "@/components/app/Logo";
+import WhatsAppModal from "@/components/app/WhatsAppModal";
 import api from "@/lib/api";
 
 const benefits = [
@@ -37,10 +38,13 @@ const faqs = [
 
 export default function Landing() {
   const [wa, setWa] = useState("+5573981891863");
+  const [waOpen, setWaOpen] = useState(false);
   useEffect(() => {
     api.get("/config/public").then((r) => setWa(r.data.whatsapp)).catch(() => {});
   }, []);
   const waLink = `https://wa.me/${wa.replace(/\D/g, "")}?text=${encodeURIComponent("Olá, gostaria de conhecer o Your-Statistics para minha empresa.")}`;
+  // waLink used as backup; primary interaction opens the WhatsAppModal to avoid api.whatsapp.com blocks
+  void waLink;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -92,7 +96,7 @@ export default function Landing() {
               <Link to="/login" data-testid="hero-demo-btn" className="rounded-xl px-5 py-3 text-sm font-medium border border-border hover:bg-accent inline-flex items-center gap-2">
                 Ver demonstração
               </Link>
-              <a href={waLink} target="_blank" rel="noreferrer" data-testid="hero-whatsapp-btn" className="rounded-xl px-5 py-3 text-sm font-medium border border-border hover:bg-accent inline-flex items-center gap-2 text-emerald-600">
+              <a href="#" onClick={(e)=>{e.preventDefault(); setWaOpen(true);}} data-testid="hero-whatsapp-btn" className="rounded-xl px-5 py-3 text-sm font-medium border border-border hover:bg-accent inline-flex items-center gap-2 text-emerald-600">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
             </div>
@@ -239,7 +243,7 @@ export default function Landing() {
               ))}
             </ul>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href={waLink} target="_blank" rel="noreferrer" data-testid="pricing-request-btn" className="ys-btn-primary rounded-xl px-5 py-3 text-sm font-medium inline-flex items-center gap-2">
+              <a href="#" onClick={(e)=>{e.preventDefault(); setWaOpen(true);}} data-testid="pricing-request-btn" className="ys-btn-primary rounded-xl px-5 py-3 text-sm font-medium inline-flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" /> Solicitar assinatura
               </a>
               <Link to="/register" className="rounded-xl px-5 py-3 text-sm font-medium border border-border hover:bg-accent">
@@ -274,6 +278,7 @@ export default function Landing() {
           <div className="text-sm text-muted-foreground">© {new Date().getFullYear()} Your-Statistics. Todos os direitos reservados.</div>
         </div>
       </footer>
+      <WhatsAppModal open={waOpen} onClose={()=>setWaOpen(false)} defaultMessage="Olá, gostaria de contratar o Your-Statistics para minha empresa." />
     </div>
   );
 }

@@ -109,10 +109,10 @@ export default function Login() {
               <div className="relative bg-background w-fit mx-auto px-3 text-xs text-muted-foreground">ou</div>
             </div>
 
-            <button type="button" onClick={() => toast.info("Login com Google chega na próxima atualização.")} data-testid="login-google-btn" className="w-full h-11 rounded-xl border border-border hover:bg-accent text-sm font-medium">
+            <button type="button" onClick={() => { const redirectUrl = window.location.origin + "/auth/callback"; window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`; }} data-testid="login-google-btn" className="w-full h-11 rounded-xl border border-border hover:bg-accent text-sm font-medium">
               Continuar com Google
             </button>
-            <button type="button" onClick={() => toast.info("Login com Apple chega na próxima atualização.")} data-testid="login-apple-btn" className="w-full h-11 rounded-xl border border-border hover:bg-accent text-sm font-medium">
+            <button type="button" onClick={() => toast.info("Sign in with Apple exige suas credenciais Apple Developer (Team ID, Key ID e arquivo .p8). Nos envie por WhatsApp que ativamos em minutos.")} data-testid="login-apple-btn" className="w-full h-11 rounded-xl border border-border hover:bg-accent text-sm font-medium">
               Continuar com Apple
             </button>
           </form>

@@ -13,6 +13,7 @@ import MasterPanel from "@/pages/MasterPanel";
 import Dashboard from "@/pages/Dashboard";
 import TransactionsPage from "@/pages/TransactionsPage";
 import ComingSoon from "@/pages/ComingSoon";
+import AuthCallback from "@/pages/AuthCallback";
 
 function Shell({ children }) { return <AppShell>{children}</AppShell>; }
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/pending-approval" element={
             <ProtectedRoute><PendingApproval /></ProtectedRoute>
           } />

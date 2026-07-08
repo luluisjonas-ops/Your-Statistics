@@ -205,6 +205,62 @@ async def public_config():
     return {"whatsapp": WHATSAPP_NUMBER, "app_name": "Your-Statistics"}
 
 
+# ---------- Google Auth (Emergent-managed) ----------
+class GoogleSessionIn(BaseModel):
+    session_id: str
+
+@api.post("/auth/google/session")
+async def google_session(payload: GoogleSessionIn, response: Response):
+    """Exchange Emergent session_id for our JWT + upsert user."""
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as hx:
+            r = await hx.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": payload.session_id},
+            )
+        if r.status_code != 200:
+            raise HTTPException(status_code=401, detail="Sessão Google inválida ou expirada.")
+        data = r.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Falha ao validar Google: {e}")
+
+    email = (data.get("email") or "").lower().strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="Google não retornou e-mail.")
+    name = data.get("name") or email.split("@")[0]
+    picture = data.get("picture") or ""
+
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        user_id = str(uuid.uuid4())
+        user = {
+            "id": user_id, "tenant_id": str(uuid.uuid4()),
+            "email": email, "password_hash": "",  # google-only user
+            "name": name, "company": "", "phone": "", "whatsapp": "",
+            "city": "", "state": "", "business_type": "", "employees_count": "",
+            "role": "user", "status": "pendente", "notes": "Cadastro via Google",
+            "picture": picture,
+            "created_at": iso(now_utc()), "last_login": iso(now_utc()),
+            "auth_provider": "google",
+        }
+        await db.users.insert_one(user.copy())
+    else:
+        await db.users.update_one({"email": email}, {"$set": {
+            "last_login": iso(now_utc()),
+            "picture": picture or user.get("picture", ""),
+        }})
+        user["last_login"] = iso(now_utc())
+        if user.get("status") == "suspenso":
+            raise HTTPException(status_code=403, detail="Sua conta foi suspensa. Entre em contato pelo WhatsApp.")
+
+    token = create_access_token(user["id"], user["email"], user.get("role", "user"))
+    response.set_cookie("access_token", token, httponly=True, samesite="lax", max_age=7*24*3600, path="/")
+    return {"token": token, "user": public_user(user)}
+
+
 # ---------- Admin (Master Panel) ----------
 @api.get("/admin/users")
 async def admin_list_users(admin: dict = Depends(require_admin), q: str = "", status: str = ""):
