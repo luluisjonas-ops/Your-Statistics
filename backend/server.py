@@ -294,6 +294,19 @@ async def create_transaction(payload: TransactionIn, user: dict = Depends(requir
         raise HTTPException(status_code=400, detail="Tipo inválido")
     if payload.amount <= 0:
         raise HTTPException(status_code=400, detail="Valor deve ser positivo")
+    # Normalize date to tz-aware ISO string
+    if payload.date:
+        try:
+            if len(payload.date) == 10:
+                normalized_date = datetime.fromisoformat(payload.date).replace(tzinfo=timezone.utc)
+            else:
+                nd = datetime.fromisoformat(payload.date.replace("Z", "+00:00"))
+                normalized_date = nd if nd.tzinfo else nd.replace(tzinfo=timezone.utc)
+            date_iso = iso(normalized_date)
+        except Exception:
+            date_iso = iso(now_utc())
+    else:
+        date_iso = iso(now_utc())
     doc = {
         "id": str(uuid.uuid4()),
         "tenant_id": user["tenant_id"],
@@ -304,10 +317,11 @@ async def create_transaction(payload: TransactionIn, user: dict = Depends(requir
         "category": payload.category or "Geral",
         "payment_method": payload.payment_method,
         "status": payload.status,
-        "date": payload.date or iso(now_utc()),
+        "date": date_iso,
         "created_at": iso(now_utc()),
     }
     await db.transactions.insert_one(doc)
+    doc.pop("_id", None)
     return {"transaction": doc}
 
 
@@ -335,8 +349,14 @@ async def finance_dashboard(user: dict = Depends(require_approved)):
     monthly = {}   # 'YYYY-MM' -> {rev,exp}
     weekly = {}    # last 7 days
     for tx in txs:
+        raw_date = tx.get("date", "")
         try:
-            d = datetime.fromisoformat(tx["date"].replace("Z", "+00:00"))
+            if len(raw_date) == 10:  # 'YYYY-MM-DD' from FE
+                d = datetime.fromisoformat(raw_date).replace(tzinfo=timezone.utc)
+            else:
+                d = datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
+                if d.tzinfo is None:
+                    d = d.replace(tzinfo=timezone.utc)
         except Exception:
             continue
         amt = float(tx.get("amount", 0))

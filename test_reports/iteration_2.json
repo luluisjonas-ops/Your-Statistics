@@ -1,0 +1,34 @@
+{
+  "summary": "Retested iteration_1 blockers. Both HIGH-priority backend bugs (POST /api/finance/transactions with YYYY-MM-DD date, GET /api/finance/dashboard tz-comparison) are FIXED and return 200. Multi-tenant isolation on /api/finance/transactions confirmed working. Frontend register submission + redirect works, but the /pending-approval page renders blank (pending-card not present in DOM) — console shows /api/auth/me returning 401 right after login, suggesting a token-storage/refresh timing issue on that route. Full demo dashboard/expenses/master approve+suspend+reactivate+details UI flows were NOT exercised in this run due to that blank-page blocker consuming the browser test budget.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "passed": [
+    "POST /api/finance/transactions (demo, YYYY-MM-DD date, receita R$100 pix) -> 200; response includes tenant_id, user_id, id, date normalized to ISO with UTC (bug fix #1 verified)",
+    "GET /api/finance/dashboard (demo) -> 200; returns kpis {revenue_today, revenue_month, expense_month, profit_month, balance, pending_bills, transactions_count}, monthly[], weekly[], recent[] (bug fix #2 verified — no more tz-aware/naive TypeError)",
+    "Multi-tenant isolation: registered new user B, admin approved, user B created a tx 'USER_B_ONLY_TX' — GET /api/finance/transactions as demo does NOT include it; GET as user B includes it",
+    "POST /api/auth/register with new email -> 200 token+user; POST /api/admin/users/{id}/approve as admin -> 200 {ok:true, status:'aprovado'}",
+    "Frontend /register form (reg-name, reg-company, reg-email, reg-password, reg-confirm, reg-terms, reg-submit-btn) submits and browser navigates to /pending-approval",
+    "Login page renders (login-email-input, login-password-input, login-submit-btn all present and functional)"
+  ],
+  "failed": [
+    {
+      "area": "frontend / PendingApproval",
+      "issue": "After successful registration or login as pending user, browser navigates to /pending-approval but the page renders BLANK — [data-testid=\"pending-card\"] is not present in the DOM within 8s. Console logs show /api/auth/me returning 401 immediately after login, so AuthContext likely never populates `user` and the route may be intercepting/redirecting or the shell isn't mounting. Reproduced twice: (a) fresh register e2e{ts}@example.com and (b) login pendente@yourstatistics.com/Pendente@2026!. Only the 'Made with Emergent' badge is visible on the screenshot.",
+      "evidence": "Playwright screenshot .screenshots/err.png and err2.png (both blank). Console log /root/.emergent/automation_output/20260708_001030/console_20260708_001030.log line 1-2: 'Failed to load resource: 401 at /api/auth/me'. Backend /api/auth/me works with Bearer token via curl (verified iter1), so this is a frontend token-persistence/timing bug specific to the /pending-approval mount path.",
+      "priority": "HIGH"
+    }
+  ],
+  "not_tested_due_to_blockers": [
+    "MasterPanel approve/suspend/reactivate/details/delete UI flow with real-time KPI counter update (backend endpoints are working per iter1 + this iter's approve API call).",
+    "Demo dashboard KPI real-time refresh after 'Nova receita' click (backend now works, but full E2E click-through not re-exercised in browser this run).",
+    "Expenses page add + delete row via UI.",
+    "ComingSoon pages (Bancos/PIX/Clientes/IA) render.",
+    "Sidebar logout + protected-route redirect (/app/dashboard -> /login when unauth; /master -> /app/dashboard for non-admin)."
+  ],
+  "action_items": [
+    "Investigate /pending-approval blank render. Likely causes: (1) AuthContext stores token in memory (not localStorage) so a full-page nav after register loses it and /auth/me 401s, blocking the guard from showing content; (2) a ProtectedRoute wrapper is unmounting PendingApproval when user is null. Check token persistence in /app/frontend/src/context/AuthContext.js and any route guard around /pending-approval in App.js/routes.",
+    "After fix, re-run the UI E2E for: register -> pending-approval WA button; admin approve/suspend/reactivate/details; demo dashboard KPI live-update; expenses add+delete; ComingSoon pages; logout + guard redirects."
+  ],
+  "success_rate": {"backend": "100%", "frontend": "55%"},
+  "retest_needed": true,
+  "full_testing_deferred": true
+}
