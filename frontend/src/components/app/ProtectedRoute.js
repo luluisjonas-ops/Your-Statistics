@@ -18,7 +18,7 @@ export function ProtectedRoute({ children, admin = false }) {
   }
   if (!user) return <Navigate to="/login" state={{ from: loc }} replace />;
   if (admin && user.role !== "admin") return <Navigate to="/app/dashboard" replace />;
-  if (!admin && user.role === "user" && user.status !== "aprovado") {
+  if (!admin && user.role === "user" && user.status !== "aprovado" && loc.pathname !== "/pending-approval") {
     return <Navigate to="/pending-approval" replace />;
   }
   return children;

@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend retest (backend skipped per request). Verified ProtectedRoute fix for /pending-approval no-op redirect and full UX flows for admin, demo, and pending users. All critical paths PASS.",
+  "tested_scope": ["frontend", "auth", "integration"],
+  "passed": [
+    "Pending user login (pendente@yourstatistics.com) lands on /pending-approval and renders pending-card (BUG FROM ITER_2 FIXED)",
+    "pending-whatsapp-btn href contains 5573981891863",
+    "pending-logout visible and returns user to /login",
+    "Unauthenticated /app/dashboard -> /login redirect",
+    "Admin (luluis@gmail.com) login -> /master",
+    "master-search filters user list",
+    "master-view-demo@yourstatistics.com opens details modal ([role=dialog])",
+    "Demo user login -> /app/dashboard",
+    "Demo user attempting /master is redirected to /app/dashboard",
+    "dash-add-revenue navigates to /app/revenues",
+    "tx-add-btn -> modal -> tx-description/tx-amount/tx-type-receita/tx-submit creates a revenue row visible in list (Teste E2E)",
+    "/app/expenses tx-add -> despesa row appears (Despesa E2E)",
+    "tx-delete-{id} + confirm executes without error",
+    "Coming-soon renders on /app/banks, /app/pix, /app/clients, /app/ai",
+    "sidebar-logout -> /login"
+  ],
+  "failed": [],
+  "action_items": [
+    "Cosmetic (non-blocker): MasterPanel KPI data-testids are dynamically generated as 'master-kpi-total-de-usuários' (label-based), not 'master-kpi-total/pendente/aprovado/suspenso' as PRD expected. Consider stable slugs (total/pendente/aprovado/suspenso) for easier automation. Values still render correctly and the counters behave properly after approve/suspend actions."
+  ],
+  "success_rate": {"backend": "skipped (100% in iter_2)", "frontend": "100% of critical flows"},
+  "retest_needed": false,
+  "full_testing_deferred": true,
+  "notes": {
+    "bug_iter2_pending_approval_blank": "FIXED — ProtectedRoute now correctly renders <PendingApproval/> when path is already /pending-approval (verified via both login and expected flow). No redirect-to-self loop observed.",
+    "correct_login_selectors": "login-email-input, login-password-input, login-submit-btn (not login-email/login-password/login-submit)"
+  }
+}
